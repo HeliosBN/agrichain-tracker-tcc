@@ -1,0 +1,5 @@
+/* Basic styles for AgriChain Tracker */
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+}
