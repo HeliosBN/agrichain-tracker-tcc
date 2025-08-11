@@ -88,13 +88,13 @@ REACT_APP_NETWORK_ID=1337
 ## 👨‍💻 Autor
 
 **Helio Breda Netto**
-- 🎓 Graduando em Ciência da Computação
+- 🎓 Graduando em Sistemas De Informação
 - 💼 Desenvolvedor Full Stack
-- 🌐 Especialista em Blockchain
+
 
 ---
 
-**Desenvolvido com ❤️ para um futuro mais transparente e sustentável** 🌱+ Vite
+ 🌱+ Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
