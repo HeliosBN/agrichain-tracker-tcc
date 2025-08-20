@@ -1,9 +1,247 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Modal, Form, Button, Nav, Alert, Spinner, Dropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
 
-// Simple components
+// Simple Login Modal Component
+const LoginModal = ({ show, onHide, onLoginSuccess }) => {
+  const [activeTab, setActiveTab] = useState('login');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'producer'
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // Simular login por enquanto
+      const userData = {
+        name: formData.email.split('@')[0],
+        email: formData.email,
+        role: 'producer'
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      onLoginSuccess(userData);
+      onHide();
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'producer' });
+    } catch (error) {
+      setError('Erro ao fazer login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('As senhas não coincidem');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Simular registro por enquanto
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        role: formData.role
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      onLoginSuccess(userData);
+      onHide();
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'producer' });
+    } catch (error) {
+      setError('Erro ao criar conta');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal show={show} onHide={onHide} centered>
+      <Modal.Header closeButton className="bg-success text-white">
+        <Modal.Title>
+          <i className="bi bi-person-circle me-2"></i>
+          {activeTab === 'login' ? 'Entrar na Conta' : 'Criar Conta'}
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        {/* Tabs */}
+        <Nav variant="tabs" className="mb-4">
+          <Nav.Item>
+            <Nav.Link 
+              active={activeTab === 'login'} 
+              onClick={() => setActiveTab('login')}
+            >
+              Login
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link 
+              active={activeTab === 'register'} 
+              onClick={() => setActiveTab('register')}
+            >
+              Registrar
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
+
+        {error && (
+          <Alert variant="danger" className="mb-3">
+            {error}
+          </Alert>
+        )}
+
+        {/* Login Form */}
+        {activeTab === 'login' && (
+          <Form onSubmit={handleLogin}>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="seu@email.com"
+                required
+                disabled={loading}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Senha</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Digite sua senha"
+                required
+                disabled={loading}
+              />
+            </Form.Group>
+
+            <Button 
+              variant="success" 
+              type="submit" 
+              className="w-100"
+              disabled={loading}
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </Form>
+        )}
+
+        {/* Register Form */}
+        {activeTab === 'register' && (
+          <Form onSubmit={handleRegister}>
+            <Form.Group className="mb-3">
+              <Form.Label>Nome Completo</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="João Silva"
+                required
+                disabled={loading}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="seu@email.com"
+                required
+                disabled={loading}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tipo de Usuário</Form.Label>
+              <Form.Select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                required
+                disabled={loading}
+              >
+                <option value="producer">🌾 Produtor</option>
+                <option value="distributor">🚛 Distribuidor</option>
+                <option value="retailer">🏪 Varejista</option>
+                <option value="consumer">👤 Consumidor</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Senha</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Mínimo 6 caracteres"
+                required
+                disabled={loading}
+                minLength={6}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-4">
+              <Form.Label>Confirmar Senha</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Digite a senha novamente"
+                required
+                disabled={loading}
+              />
+            </Form.Group>
+
+            <Button 
+              variant="success" 
+              type="submit" 
+              className="w-100"
+              disabled={loading}
+            >
+              {loading ? 'Criando conta...' : 'Criar Conta'}
+            </Button>
+          </Form>
+        )}
+      </Modal.Body>
+    </Modal>
+  );
+};
 const HomePage = () => (
   <div className="container mt-5">
     <div className="row">
@@ -181,6 +419,26 @@ const ConsumerPage = () => (
 );
 
 function App() {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Verificar se há usuário logado ao carregar
+  React.useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
   return (
     <Router>
       <div className="App">
@@ -189,15 +447,54 @@ function App() {
             <Link className="navbar-brand" to="/">
               🌾 AgriChain Tracker
             </Link>
+            
+            <div className="d-flex align-items-center">
+              {user ? (
+                <Dropdown align="end">
+                  <Dropdown.Toggle variant="outline-light" id="user-dropdown">
+                    <i className="bi bi-person-circle me-2"></i>
+                    {user.name}
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item disabled>
+                      <strong>{user.name}</strong>
+                      <br />
+                      <small className="text-muted">{user.email}</small>
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item onClick={handleLogout} className="text-danger">
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Sair
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <Button 
+                  variant="outline-light" 
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  <i className="bi bi-person-circle me-2"></i>
+                  Entrar
+                </Button>
+              )}
+            </div>
           </div>
         </nav>
         
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/track" element={<TrackPage />} />
-          <Route path="/consumer" element={<ConsumerPage />} />
-        </Routes>
+        <div style={{ paddingTop: '20px' }}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/track" element={<TrackPage />} />
+            <Route path="/consumer" element={<ConsumerPage />} />
+          </Routes>
+        </div>
+
+        <LoginModal 
+          show={showLoginModal} 
+          onHide={() => setShowLoginModal(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
       </div>
     </Router>
   );

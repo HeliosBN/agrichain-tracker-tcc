@@ -1,12 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, Dropdown, Button, Badge } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import { useSupplyChain } from '../../hooks/useSupplyChain';
+import AuthModal from '../Auth/AuthModal';
 
 const NavigationBar = () => {
   const { account, isConnected, connectWallet, disconnectWallet } = useSupplyChain();
   const [expanded, setExpanded] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    // Verificar se há usuário logado no localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
   const truncateAddress = (address) => {
     if (!address) return 'Not Connected';
@@ -120,6 +141,69 @@ const NavigationBar = () => {
           </Nav>
 
           <Nav className="d-flex align-items-center">
+            {/* User Authentication */}
+            {user ? (
+              <Dropdown align="end" className="me-3">
+                <Dropdown.Toggle 
+                  variant="outline-light" 
+                  id="user-dropdown"
+                  className="d-flex align-items-center"
+                >
+                  <i className="bi bi-person-circle me-2"></i>
+                  <span className="d-none d-md-inline me-1">
+                    {user.name}
+                  </span>
+                  <span className="d-md-none">
+                    Perfil
+                  </span>
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item disabled>
+                    <div className="text-center">
+                      <i className="bi bi-person-circle" style={{ fontSize: '2rem' }}></i>
+                      <div className="mt-1">
+                        <strong>{user.name}</strong>
+                        <br />
+                        <small className="text-muted">{user.email}</small>
+                        <br />
+                        <Badge bg="success" className="mt-1">
+                          {user.role === 'producer' && '🌾 Produtor'}
+                          {user.role === 'distributor' && '🚛 Distribuidor'}
+                          {user.role === 'retailer' && '🏪 Varejista'}
+                          {user.role === 'consumer' && '👤 Consumidor'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item as={Link} to="/profile">
+                    <i className="bi bi-person-gear me-2"></i>
+                    Meu Perfil
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/my-products">
+                    <i className="bi bi-box-seam me-2"></i>
+                    Meus Produtos
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout} className="text-danger">
+                    <i className="bi bi-box-arrow-right me-2"></i>
+                    Sair
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <Button 
+                variant="outline-light" 
+                onClick={() => setShowAuthModal(true)}
+                className="d-flex align-items-center me-3"
+              >
+                <i className="bi bi-person-circle me-1"></i>
+                <span className="d-none d-sm-inline">Entrar</span>
+                <span className="d-sm-none">Login</span>
+              </Button>
+            )}
+
+            {/* Blockchain Wallet */}
             {isConnected ? (
               <Dropdown align="end">
                 <Dropdown.Toggle 
@@ -164,6 +248,13 @@ const NavigationBar = () => {
           </Nav>
         </Navbar.Collapse>
       </Container>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        show={showAuthModal} 
+        onHide={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </Navbar>
   );
 };

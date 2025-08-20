@@ -3,3 +3,75 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
 }
+
+/* Auth Modal Styles */
+.modal-header.bg-success {
+  border-bottom: none;
+}
+
+.modal-footer.bg-light {
+  border-top: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #198754;
+  color: white;
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #f8f9fa;
+  border: none;
+}
+
+/* User dropdown styles */
+.dropdown-menu {
+  min-width: 250px;
+}
+
+.dropdown-item:disabled {
+  opacity: 1;
+  color: inherit;
+  background-color: transparent;
+}
+
+/* Navbar user section */
+.navbar .dropdown-toggle::after {
+  display: none;
+}
+
+/* Loading spinner in buttons */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Alert styles */
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+}
+
+/* Form control focus states */
+.form-control:focus,
+.form-select:focus {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Button hover effects */
+.btn-success:hover {
+  background-color: #157347;
+  border-color: #146c43;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
