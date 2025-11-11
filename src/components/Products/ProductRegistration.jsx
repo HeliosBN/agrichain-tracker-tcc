@@ -8,15 +8,18 @@ import {
   Button, 
   Alert, 
   Spinner,
-  Badge
+  Badge,
+  Modal
 } from 'react-bootstrap';
 import { useSupplyChain } from '../../hooks/useSupplyChain';
+import MetaMaskConnect from '../Web3/MetaMaskConnect';
+import web3Service from '../../services/web3Service';
 
 const ProductRegistration = () => {
   const { registerProduct, loading, error, isConnected } = useSupplyChain();
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    category: 'vegetables',
     producer: '',
     farmLocation: '',
     harvestDate: '',
@@ -24,32 +27,56 @@ const ProductRegistration = () => {
     unit: 'kg',
     certifications: [],
     description: '',
-    treatments: ''
+    treatments: '',
+    batchNumber: '',
+    qualityGrade: 'A',
+    expiryDate: ''
   });
   const [success, setSuccess] = useState(null);
   const [validated, setValidated] = useState(false);
+  const [web3Connection, setWeb3Connection] = useState({
+    isConnected: false,
+    isCorrectNetwork: false,
+    account: null,
+    web3: null,
+    isAuthorized: false
+  });
+  const [blockchainLoading, setBlockchainLoading] = useState(false);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
+  const [transactionResult, setTransactionResult] = useState(null);
 
   const categories = [
-    'Vegetables',
-    'Fruits',
-    'Grains',
-    'Legumes',
-    'Dairy',
-    'Meat',
-    'Herbs & Spices',
-    'Other'
+    { value: 'vegetables', label: 'Vegetais' },
+    { value: 'fruits', label: 'Frutas' },
+    { value: 'grains', label: 'Grãos' },
+    { value: 'dairy', label: 'Laticínios' },
+    { value: 'meat', label: 'Carnes' },
+    { value: 'herbs', label: 'Ervas e Temperos' },
+    { value: 'others', label: 'Outros' }
   ];
 
   const certificationOptions = [
-    'Organic',
-    'Fair Trade',
-    'Non-GMO',
-    'Rainforest Alliance',
-    'GLOBALGAP',
-    'Sustainable'
+    'organic',
+    'fair-trade', 
+    'non-gmo',
+    'rainforest-alliance',
+    'globalgap',
+    'sustainable'
   ];
 
-  const units = ['kg', 'tons', 'boxes', 'bags', 'pieces'];
+  const qualityGrades = [
+    { value: 'A', label: 'A - Premium' },
+    { value: 'B', label: 'B - Bom' },
+    { value: 'C', label: 'C - Regular' },
+    { value: 'premium', label: 'Premium' }
+  ];
+
+  const units = [
+    { value: 'kg', label: 'Quilogramas (kg)' },
+    { value: 'tons', label: 'Toneladas' },
+    { value: 'units', label: 'Unidades' },
+    { value: 'liters', label: 'Litros' }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,69 +105,151 @@ const ProductRegistration = () => {
       return;
     }
 
-    if (!isConnected) {
-      alert('Please connect your wallet first');
+    // Verificar conexão Web3
+    if (!web3Connection.isConnected || !web3Connection.isCorrectNetwork) {
+      alert('Por favor, conecte sua wallet e configure a rede Sepolia primeiro');
       return;
     }
 
     try {
       setSuccess(null);
-      const result = await registerProduct({
+      setBlockchainLoading(true);
+
+      // Primeiro, registrar no banco de dados PostgreSQL
+      console.log('📝 Registrando produto no banco de dados...');
+      const dbResult = await registerProduct({
         ...formData,
         certifications: formData.certifications.join(', '),
         treatments: formData.treatments.split(',').map(t => t.trim()).filter(t => t)
       });
 
-      setSuccess({
-        productId: result.productId,
-        transactionHash: result.transactionHash
-      });
+      // Depois, registrar na blockchain
+      console.log('⛓️ Registrando produto na blockchain...');
+      const blockchainData = {
+        name: formData.name,
+        category: formData.category,
+        producer: formData.producer,
+        producerDocument: '', // Pode ser adicionado depois
+        harvestDate: formData.harvestDate,
+        expiryDate: formData.expiryDate || null,
+        quantity: parseInt(formData.quantity),
+        unit: formData.unit,
+        location: {
+          address: formData.farmLocation,
+          coordinates: null // Pode ser adicionado depois
+        },
+        certifications: formData.certifications,
+        batchNumber: formData.batchNumber,
+        qualityGrade: formData.qualityGrade,
+        ipfsHash: '' // Para futuras implementações com IPFS
+      };
 
-      // Reset form
-      setFormData({
-        name: '',
-        category: '',
-        producer: '',
-        farmLocation: '',
-        harvestDate: '',
-        quantity: '',
-        unit: 'kg',
-        certifications: [],
-        description: '',
-        treatments: ''
-      });
-      setValidated(false);
+      const blockchainResult = await web3Service.registerProduct(blockchainData);
+      
+      if (blockchainResult.success) {
+        setTransactionResult({
+          type: 'success',
+          productId: blockchainResult.productId,
+          transactionHash: blockchainResult.transactionHash,
+          blockNumber: blockchainResult.blockNumber,
+          gasUsed: blockchainResult.gasUsed,
+          etherscanUrl: blockchainResult.etherscanUrl,
+          dbResult: dbResult
+        });
+        
+        setSuccess({
+          productId: blockchainResult.productId,
+          transactionHash: blockchainResult.transactionHash,
+          message: 'Produto registrado com sucesso no banco de dados e na blockchain!'
+        });
+
+        // Reset form
+        setFormData({
+          name: '',
+          category: 'vegetables',
+          producer: '',
+          farmLocation: '',
+          harvestDate: '',
+          quantity: '',
+          unit: 'kg',
+          certifications: [],
+          description: '',
+          treatments: '',
+          batchNumber: '',
+          qualityGrade: 'A',
+          expiryDate: ''
+        });
+        setValidated(false);
+        setShowTransactionModal(true);
+      } else {
+        // Se falhou na blockchain, ainda mostramos sucesso do DB mas com aviso
+        setTransactionResult({
+          type: 'partial',
+          error: blockchainResult.error,
+          dbResult: dbResult
+        });
+        setShowTransactionModal(true);
+      }
+
     } catch (err) {
       console.error('Registration failed:', err);
+      setTransactionResult({
+        type: 'error',
+        error: err.message,
+        dbResult: null
+      });
+      setShowTransactionModal(true);
+    } finally {
+      setBlockchainLoading(false);
     }
+  };
+
+  const handleWeb3ConnectionChange = (connectionData) => {
+    setWeb3Connection(connectionData);
   };
 
   return (
     <Container className="py-4">
       <Row className="justify-content-center">
-        <Col lg={8} xl={6}>
+        <Col lg={10} xl={8}>
+          {/* MetaMask Connection Card */}
+          <div className="mb-4">
+            <MetaMaskConnect onConnectionChange={handleWeb3ConnectionChange} />
+          </div>
+
           <Card className="shadow-sm">
             <Card.Header className="bg-success text-white">
               <h4 className="mb-0">
                 <i className="bi bi-plus-circle me-2"></i>
-                Register New Product
+                Registrar Novo Produto
               </h4>
-              <small>Add a new agricultural product to the blockchain</small>
+              <small>Adicione um produto agrícola ao banco de dados e blockchain</small>
             </Card.Header>
             <Card.Body className="p-4">
-              {!isConnected && (
+              {/* Connection Status Alert */}
+              {!web3Connection.isConnected && (
                 <Alert variant="warning" className="mb-4">
                   <Alert.Heading className="h6">
                     <i className="bi bi-exclamation-triangle me-2"></i>
-                    Wallet Connection Required
+                    Conexão Blockchain Necessária
                   </Alert.Heading>
-                  Please connect your wallet to register products on the blockchain.
+                  Por favor, conecte sua wallet MetaMask e configure a rede Sepolia para registrar produtos na blockchain.
+                </Alert>
+              )}
+
+              {web3Connection.isConnected && !web3Connection.isCorrectNetwork && (
+                <Alert variant="warning" className="mb-4">
+                  <Alert.Heading className="h6">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    Rede Incorreta
+                  </Alert.Heading>
+                  Por favor, mude para a rede Sepolia Testnet.
                 </Alert>
               )}
 
               {error && (
                 <Alert variant="danger" className="mb-4">
-                  <Alert.Heading className="h6">Registration Failed</Alert.Heading>
+                  <Alert.Heading className="h6">Falha no Registro</Alert.Heading>
                   {error}
                 </Alert>
               )}
@@ -149,35 +258,44 @@ const ProductRegistration = () => {
                 <Alert variant="success" className="mb-4">
                   <Alert.Heading className="h6">
                     <i className="bi bi-check-circle me-2"></i>
-                    Product Successfully Registered!
+                    {success.message || 'Produto Registrado com Sucesso!'}
                   </Alert.Heading>
                   <p className="mb-2">
-                    <strong>Product ID:</strong> <code>{success.productId}</code>
+                    <strong>ID do Produto:</strong> <code>{success.productId}</code>
                   </p>
-                  <p className="mb-0">
-                    <strong>Transaction Hash:</strong>
-                    <br />
-                    <small className="font-monospace">{success.transactionHash}</small>
-                  </p>
+                  {success.transactionHash && (
+                    <p className="mb-0">
+                      <strong>Hash da Transação:</strong>{' '}
+                      <a 
+                        href={`https://sepolia.etherscan.io/tx/${success.transactionHash}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-decoration-none"
+                      >
+                        <code>{success.transactionHash.substring(0, 10)}...</code>
+                        <i className="bi bi-external-link ms-1"></i>
+                      </a>
+                    </p>
+                  )}
                 </Alert>
               )}
-
+                    
               <Form noValidate validated={validated} onSubmit={handleSubmit}>
                 <Row className="g-3">
                   {/* Product Name */}
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Product Name *</Form.Label>
+                      <Form.Label>Nome do Produto *</Form.Label>
                       <Form.Control
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="e.g., Organic Tomatoes"
+                        placeholder="ex: Tomates Orgânicos"
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please provide a product name.
+                        Por favor, forneça o nome do produto.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -185,22 +303,21 @@ const ProductRegistration = () => {
                   {/* Category */}
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Category *</Form.Label>
+                      <Form.Label>Categoria *</Form.Label>
                       <Form.Select
                         name="category"
                         value={formData.category}
                         onChange={handleInputChange}
                         required
                       >
-                        <option value="">Select category...</option>
                         {categories.map(category => (
-                          <option key={category} value={category}>
-                            {category}
+                          <option key={category.value} value={category.value}>
+                            {category.label}
                           </option>
                         ))}
                       </Form.Select>
                       <Form.Control.Feedback type="invalid">
-                        Please select a category.
+                        Por favor, selecione uma categoria.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -208,17 +325,17 @@ const ProductRegistration = () => {
                   {/* Producer */}
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Producer/Farm Name *</Form.Label>
+                      <Form.Label>Produtor/Fazenda *</Form.Label>
                       <Form.Control
                         type="text"
                         name="producer"
                         value={formData.producer}
                         onChange={handleInputChange}
-                        placeholder="e.g., Green Valley Farm"
+                        placeholder="ex: Fazenda Vale Verde"
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please provide the producer name.
+                        Por favor, forneça o nome do produtor.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -226,17 +343,17 @@ const ProductRegistration = () => {
                   {/* Farm Location */}
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Farm Location *</Form.Label>
+                      <Form.Label>Localização da Fazenda *</Form.Label>
                       <Form.Control
                         type="text"
                         name="farmLocation"
                         value={formData.farmLocation}
                         onChange={handleInputChange}
-                        placeholder="e.g., São Paulo, SP, Brazil"
+                        placeholder="ex: São Paulo, SP, Brasil"
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please provide the farm location.
+                        Por favor, forneça a localização da fazenda.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -244,7 +361,7 @@ const ProductRegistration = () => {
                   {/* Harvest Date */}
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Harvest Date *</Form.Label>
+                      <Form.Label>Data da Colheita *</Form.Label>
                       <Form.Control
                         type="date"
                         name="harvestDate"
@@ -254,15 +371,32 @@ const ProductRegistration = () => {
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please provide the harvest date.
+                        Por favor, forneça a data da colheita.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
 
-                  {/* Quantity and Unit */}
-                  <Col md={3}>
+                  {/* Expiry Date */}
+                  <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Quantity *</Form.Label>
+                      <Form.Label>Data de Validade</Form.Label>
+                      <Form.Control
+                        type="date"
+                        name="expiryDate"
+                        value={formData.expiryDate}
+                        onChange={handleInputChange}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                      <Form.Text className="text-muted">
+                        Opcional: data de validade do produto
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+
+                  {/* Quantity and Unit */}
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>Quantidade *</Form.Label>
                       <Form.Control
                         type="number"
                         name="quantity"
@@ -274,32 +408,67 @@ const ProductRegistration = () => {
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please provide the quantity.
+                        Por favor, forneça a quantidade.
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
 
-                  <Col md={3}>
+                  <Col md={4}>
                     <Form.Group>
-                      <Form.Label>Unit</Form.Label>
+                      <Form.Label>Unidade</Form.Label>
                       <Form.Select
                         name="unit"
                         value={formData.unit}
                         onChange={handleInputChange}
                       >
                         {units.map(unit => (
-                          <option key={unit} value={unit}>
-                            {unit}
+                          <option key={unit.value} value={unit.value}>
+                            {unit.label}
                           </option>
                         ))}
                       </Form.Select>
                     </Form.Group>
                   </Col>
 
+                  {/* Quality Grade */}
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label>Grau de Qualidade</Form.Label>
+                      <Form.Select
+                        name="qualityGrade"
+                        value={formData.qualityGrade}
+                        onChange={handleInputChange}
+                      >
+                        {qualityGrades.map(grade => (
+                          <option key={grade.value} value={grade.value}>
+                            {grade.label}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+
+                  {/* Batch Number */}
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Número do Lote</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="batchNumber"
+                        value={formData.batchNumber}
+                        onChange={handleInputChange}
+                        placeholder="ex: LT2024001"
+                      />
+                      <Form.Text className="text-muted">
+                        Opcional: número do lote para rastreamento
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+
                   {/* Certifications */}
                   <Col xs={12}>
                     <Form.Group>
-                      <Form.Label>Certifications</Form.Label>
+                      <Form.Label>Certificações</Form.Label>
                       <div className="mt-2">
                         {certificationOptions.map(certification => (
                           <Form.Check
@@ -307,7 +476,7 @@ const ProductRegistration = () => {
                             inline
                             type="checkbox"
                             id={`cert-${certification}`}
-                            label={certification}
+                            label={certification.toUpperCase()}
                             checked={formData.certifications.includes(certification)}
                             onChange={() => handleCertificationChange(certification)}
                             className="me-3 mb-2"
@@ -320,17 +489,17 @@ const ProductRegistration = () => {
                   {/* Treatments */}
                   <Col xs={12}>
                     <Form.Group>
-                      <Form.Label>Treatments Used</Form.Label>
+                      <Form.Label>Tratamentos Utilizados</Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={2}
                         name="treatments"
                         value={formData.treatments}
                         onChange={handleInputChange}
-                        placeholder="List any pesticides, fertilizers, or treatments used (comma-separated)"
+                        placeholder="Liste pesticidas, fertilizantes ou tratamentos utilizados (separados por vírgula)"
                       />
                       <Form.Text className="text-muted">
-                        Optional: List treatments, pesticides, or fertilizers used during cultivation
+                        Opcional: liste tratamentos, pesticidas ou fertilizantes usados
                       </Form.Text>
                     </Form.Group>
                   </Col>
@@ -338,14 +507,14 @@ const ProductRegistration = () => {
                   {/* Description */}
                   <Col xs={12}>
                     <Form.Group>
-                      <Form.Label>Additional Description</Form.Label>
+                      <Form.Label>Descrição Adicional</Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={3}
                         name="description"
                         value={formData.description}
                         onChange={handleInputChange}
-                        placeholder="Any additional information about the product..."
+                        placeholder="Informações adicionais sobre o produto..."
                       />
                     </Form.Group>
                   </Col>
@@ -354,11 +523,11 @@ const ProductRegistration = () => {
                   {formData.certifications.length > 0 && (
                     <Col xs={12}>
                       <div>
-                        <small className="text-muted">Selected certifications:</small>
+                        <small className="text-muted">Certificações selecionadas:</small>
                         <div className="mt-1">
                           {formData.certifications.map(cert => (
                             <Badge key={cert} bg="success" className="me-2">
-                              {cert}
+                              {cert.toUpperCase()}
                             </Badge>
                           ))}
                         </div>
@@ -373,9 +542,9 @@ const ProductRegistration = () => {
                         type="submit"
                         variant="success"
                         size="lg"
-                        disabled={loading || !isConnected}
+                        disabled={loading || blockchainLoading || !web3Connection.isConnected || !web3Connection.isCorrectNetwork}
                       >
-                        {loading ? (
+                        {(loading || blockchainLoading) ? (
                           <>
                             <Spinner
                               as="span"
@@ -384,24 +553,113 @@ const ProductRegistration = () => {
                               role="status"
                               className="me-2"
                             />
-                            Registering on Blockchain...
+                            {blockchainLoading ? 'Registrando na Blockchain...' : 'Registrando no Banco...'}
                           </>
                         ) : (
                           <>
-                            <i className="bi bi-check-circle me-2"></i>
-                            Register Product
+                            <i className="bi bi-shield-check me-2"></i>
+                            Registrar Produto
                           </>
                         )}
                       </Button>
                     </div>
                     <Form.Text className="text-muted text-center d-block mt-2">
-                      This action will create an immutable record on the blockchain
+                      Esta ação criará um registro imutável na blockchain
                     </Form.Text>
                   </Col>
                 </Row>
               </Form>
             </Card.Body>
           </Card>
+
+          {/* Transaction Result Modal */}
+          <Modal show={showTransactionModal} onHide={() => setShowTransactionModal(false)} centered size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                {transactionResult?.type === 'success' && (
+                  <>
+                    <i className="bi bi-check-circle text-success me-2"></i>
+                    Registro Concluído
+                  </>
+                )}
+                {transactionResult?.type === 'partial' && (
+                  <>
+                    <i className="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Registro Parcial
+                  </>
+                )}
+                {transactionResult?.type === 'error' && (
+                  <>
+                    <i className="bi bi-x-circle text-danger me-2"></i>
+                    Erro no Registro
+                  </>
+                )}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {transactionResult?.type === 'success' && (
+                <div>
+                  <Alert variant="success">
+                    <h6>✅ Sucesso Completo!</h6>
+                    <p>O produto foi registrado com sucesso tanto no banco de dados quanto na blockchain.</p>
+                  </Alert>
+                  
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <strong>ID do Produto:</strong>
+                      <div className="font-monospace">{transactionResult.productId}</div>
+                    </div>
+                    <div className="col-12">
+                      <strong>Hash da Transação:</strong>
+                      <div className="font-monospace small text-break">{transactionResult.transactionHash}</div>
+                      <a 
+                        href={transactionResult.etherscanUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-primary btn-sm mt-2"
+                      >
+                        <i className="bi bi-external-link me-1"></i>
+                        Ver no Etherscan
+                      </a>
+                    </div>
+                    <div className="col-6">
+                      <strong>Bloco:</strong>
+                      <div>{transactionResult.blockNumber}</div>
+                    </div>
+                    <div className="col-6">
+                      <strong>Gas Usado:</strong>
+                      <div>{transactionResult.gasUsed}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {transactionResult?.type === 'partial' && (
+                <div>
+                  <Alert variant="warning">
+                    <h6>⚠️ Registro Parcial</h6>
+                    <p>O produto foi salvo no banco de dados, mas houve erro na blockchain:</p>
+                    <small>{transactionResult.error}</small>
+                  </Alert>
+                </div>
+              )}
+
+              {transactionResult?.type === 'error' && (
+                <div>
+                  <Alert variant="danger">
+                    <h6>❌ Erro no Registro</h6>
+                    <p>Ocorreu um erro durante o registro:</p>
+                    <small>{transactionResult.error}</small>
+                  </Alert>
+                </div>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowTransactionModal(false)}>
+                Fechar
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </Col>
       </Row>
     </Container>

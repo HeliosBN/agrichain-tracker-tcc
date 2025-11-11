@@ -70,74 +70,107 @@ const NavigationBar = () => {
               className={isActiveLink('/')}
             >
               <i className="bi bi-house-fill me-1"></i>
-              Dashboard
+              Início
             </Nav.Link>
             
-            <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle 
-                as={Nav.Link} 
-                id="products-dropdown"
-                className="d-flex align-items-center"
-              >
-                <i className="bi bi-box-seam me-1"></i>
-                Products
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item 
-                  as={Link} 
-                  to="/register-product" 
-                  onClick={closeMenu}
+            {user && (
+              <Dropdown as={Nav.Item}>
+                <Dropdown.Toggle 
+                  as={Nav.Link} 
+                  id="products-dropdown"
+                  className="d-flex align-items-center"
                 >
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Register Product
-                </Dropdown.Item>
-                <Dropdown.Item 
-                  as={Link} 
-                  to="/track-product" 
-                  onClick={closeMenu}
-                >
-                  <i className="bi bi-search me-2"></i>
-                  Track Product
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                  <i className="bi bi-box-seam me-1"></i>
+                  Produtos
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {user.role === 'producer' && (
+                    <Dropdown.Item 
+                      as={Link} 
+                      to="/register" 
+                      onClick={closeMenu}
+                    >
+                      <i className="bi bi-plus-circle me-2"></i>
+                      Registrar Produto
+                    </Dropdown.Item>
+                  )}
+                  
+                  {(user.role === 'distributor' || user.role === 'retailer') && (
+                    <Dropdown.Item 
+                      as={Link} 
+                      to="/update" 
+                      onClick={closeMenu}
+                    >
+                      <i className="bi bi-pencil-square me-2"></i>
+                      Atualizar Produto
+                    </Dropdown.Item>
+                  )}
+                  
+                  <Dropdown.Item 
+                    as={Link} 
+                    to="/track" 
+                    onClick={closeMenu}
+                  >
+                    <i className="bi bi-search me-2"></i>
+                    Rastrear Produto
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
 
-            <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle 
-                as={Nav.Link} 
-                id="dashboards-dropdown"
-                className="d-flex align-items-center"
-              >
-                <i className="bi bi-grid-3x3-gap me-1"></i>
-                Dashboards
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item 
-                  as={Link} 
-                  to="/producer-dashboard" 
-                  onClick={closeMenu}
+            {user && (
+              <Dropdown as={Nav.Item}>
+                <Dropdown.Toggle 
+                  as={Nav.Link} 
+                  id="dashboards-dropdown"
+                  className="d-flex align-items-center"
                 >
-                  <i className="bi bi-person-workspace me-2"></i>
-                  Producer
-                </Dropdown.Item>
-                <Dropdown.Item 
-                  as={Link} 
-                  to="/distributor-dashboard" 
-                  onClick={closeMenu}
-                >
-                  <i className="bi bi-truck me-2"></i>
-                  Distributor
-                </Dropdown.Item>
-                <Dropdown.Item 
-                  as={Link} 
-                  to="/consumer-view" 
-                  onClick={closeMenu}
-                >
-                  <i className="bi bi-person-check me-2"></i>
-                  Consumer
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                  <i className="bi bi-grid-3x3-gap me-1"></i>
+                  Dashboards
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {user.role === 'producer' && (
+                    <Dropdown.Item 
+                      as={Link} 
+                      to="/register" 
+                      onClick={closeMenu}
+                    >
+                      <i className="bi bi-plus-circle me-2"></i>
+                      Registrar Produtos
+                    </Dropdown.Item>
+                  )}
+                  
+                  {(user.role === 'distributor' || user.role === 'retailer') && (
+                    <Dropdown.Item 
+                      as={Link} 
+                      to="/update" 
+                      onClick={closeMenu}
+                    >
+                      <i className="bi bi-pencil-square me-2"></i>
+                      Atualizar Produtos
+                    </Dropdown.Item>
+                  )}
+                  
+                  <Dropdown.Item 
+                    as={Link} 
+                    to="/track" 
+                    onClick={closeMenu}
+                  >
+                    <i className="bi bi-search me-2"></i>
+                    Rastrear Produtos
+                  </Dropdown.Item>
+                  
+                  <Dropdown.Item 
+                    as={Link} 
+                    to="/consumer" 
+                    onClick={closeMenu}
+                  >
+                    <i className="bi bi-person-check me-2"></i>
+                    Portal do Consumidor
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
           </Nav>
 
           <Nav className="d-flex align-items-center">

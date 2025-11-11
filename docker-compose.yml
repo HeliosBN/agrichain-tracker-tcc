@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: agrichain-postgres
+    environment:
+      POSTGRES_DB: agrichain_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: agrichain2024
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database/init-with-users.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - agrichain-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PgAdmin for Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: agrichain-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@agrichain.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - agrichain-network
+    restart: unless-stopped
+
+  # Backend API Server (Optional - can run separately)
+  # backend:
+  #   build: 
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: agrichain-backend
+  #   environment:
+  #     NODE_ENV: development
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_NAME: agrichain_db
+  #     DB_USER: postgres
+  #     DB_PASSWORD: agrichain2024
+  #     JWT_SECRET: agrichain-super-secret-jwt-key-2024
+  #     PORT: 3001
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - agrichain-network
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  agrichain-network:
+    driver: bridge
+
+# Development Commands:
+# docker-compose up -d postgres pgadmin  # Start only database services
+# docker-compose up -d                   # Start all services
+# docker-compose down                    # Stop all services
+# docker-compose logs postgres           # View postgres logs
+# docker-compose exec postgres psql -U postgres -d agrichain_db  # Connect to database

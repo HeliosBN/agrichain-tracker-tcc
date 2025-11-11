@@ -98,6 +98,13 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/supply-chain', supplyChainRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 
+// Debug routes (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  const debugRoutes = require('./routes/debugRoutes');
+  app.use('/api/debug', debugRoutes);
+  console.log('🔧 Debug routes enabled at /api/debug');
+}
+
 // Welcome route
 app.get('/', (req, res) => {
   res.json({

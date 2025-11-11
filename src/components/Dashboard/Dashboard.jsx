@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { useSupplyChain } from '../../hooks/useSupplyChain';
 
 const Dashboard = () => {
-  const { isConnected, loading } = useSupplyChain();
+  // Removendo o hook problemático e usando estados locais
+  const [isConnected, setIsConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalProducts: 0,
     activeShipments: 0,

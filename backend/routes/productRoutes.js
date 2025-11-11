@@ -54,12 +54,12 @@ router.get('/', async (req, res) => {
         {
           model: User,
           as: 'producer',
-          attributes: ['id', 'name', 'company_name']
+          attributes: ['id', 'name', 'email']
         },
         {
           model: User,
           as: 'currentHolder',
-          attributes: ['id', 'name', 'company_name'],
+          attributes: ['id', 'name', 'email'],
           required: false
         }
       ],
@@ -103,12 +103,12 @@ router.get('/:id', async (req, res) => {
         {
           model: User,
           as: 'producer',
-          attributes: ['id', 'name', 'email', 'company_name', 'phone']
+          attributes: ['id', 'name', 'email', 'role']
         },
         {
           model: User,
           as: 'currentHolder',
-          attributes: ['id', 'name', 'company_name'],
+          attributes: ['id', 'name', 'email'],
           required: false
         },
         {
@@ -118,12 +118,12 @@ router.get('/:id', async (req, res) => {
             {
               model: User,
               as: 'fromUser',
-              attributes: ['id', 'name', 'company_name']
+              attributes: ['id', 'name', 'email']
             },
             {
               model: User,
               as: 'toUser',
-              attributes: ['id', 'name', 'company_name']
+              attributes: ['id', 'name', 'email']
             }
           ],
           order: [['timestamp', 'ASC']]
@@ -245,7 +245,7 @@ router.post('/', async (req, res) => {
         {
           model: User,
           as: 'producer',
-          attributes: ['id', 'name', 'company_name']
+          attributes: ['id', 'name', 'email', 'role']
         }
       ]
     });
