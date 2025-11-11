@@ -331,7 +331,7 @@ Este projeto está sob licença MIT. Veja `LICENSE` para detalhes.
 
 ## 👨‍💻 Autor
 
-**Hélio Bezerra** - TCC Faculdade
+**Helio Breda Netto** - TCC Faculdade
 - GitHub: [@HeliosBN](https://github.com/HeliosBN)
 - LinkedIn: [Perfil](https://linkedin.com/in/helio-bezerra)
 
