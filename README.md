@@ -1,108 +1,182 @@
-# 🌾 AgriChain Tracker
+#  AgriChainTracker
 
-## Sistema de Rastreabilidade da Cadeia de Suprimentos Agrícolas usando Blockchain
+O AgriChain é uma plataforma completa de rastreamento para a cadeia de suprimentos agrícola, utilizando tecnologia blockchain para garantir transparência, imutabilidade e confiabilidade dos dados. O sistema integra banco de dados PostgreSQL com blockchain Ethereum (rede Sepolia) para criar um sistema híbrido robusto.
 
-Uma aplicação web moderna e responsiva desenvolvida com React e Bootstrap que permite o rastreamento completo de produtos agrícolas desde a fazenda até o consumidor final, utilizando tecnologia blockchain para garantir transparência e autenticidade.
+##  Funcionalidades Principais
 
-## 🎯 Objetivos do Projeto
 
-### Objetivo Geral
-Desenvolver um protótipo de website utilizando a tecnologia blockchain para rastrear cada etapa da cadeia de suprimentos agrícolas, desde a saída do produtor até o destino final, promovendo maior transparência, eficiência e confiabilidade no processo.
+### Integração Blockchain
+- Smart contracts em Solidity na rede Sepolia
+- Conexão MetaMask para transações
+- Registro imutável de produtos na blockchain
+- Rastreamento completo da cadeia de suprimentos
+- Verificação via Etherscan
 
-### Objetivos Específicos
-- ✅ Implementar um sistema de rastreabilidade baseado em blockchain
-- ✅ Propor um site responsivo para facilitar o acesso às informações
-- ✅ Garantir a segurança dos dados e a integridade do sistema
-- ✅ Facilitar o monitoramento em tempo real das etapas
-- ✅ Integrar funcionalidades para cumprimento de normas regulatórias
-- ✅ Validar o protótipo por meio de testes práticos
+###  Gestão de Produtos
+- Registro detalhado de produtos agrícolas
+- Categorização (vegetais, frutas, grãos, etc.)
+- Certificações (orgânico, fair-trade, etc.)
+- Dados de qualidade e rastreabilidade
 
-## 🚀 Funcionalidades
-
-### 👨‍🌾 Para Produtores
-- **Registro de Produtos**: Cadastro completo de produtos agrícolas
-- **Gerenciamento de Certificações**: Validação de selos orgânicos e sustentáveis
-- **Atualização de Status**: Acompanhamento em tempo real da produção
-- **Dashboard Personalizado**: Visão geral dos produtos registrados
-
-### 🚛 Para Distribuidores
-- **Gestão de Remessas**: Controle completo das entregas
-- **Monitoramento de Temperatura**: Acompanhamento de condições de transporte
-- **Rastreamento em Tempo Real**: Localização e status das mercadorias
-- **Relatórios de Entrega**: Histórico detalhado de todas as operações
-
-### 👥 Para Consumidores
-- **Rastreamento Simples**: Busca por código do produto ou QR Code
-- **Histórico Completo**: Visualização de toda a jornada do produto
-- **Verificação de Autenticidade**: Dados imutáveis na blockchain
-- **Informações de Sustentabilidade**: Certificações e práticas ambientais
+###  Visualização e Monitoramento
+- Dashboard responsivo com Bootstrap 5
+- Busca de produtos na blockchain
+- Timeline de eventos da cadeia
+- Estatísticas em tempo real
 
 ## 🛠️ Tecnologias Utilizadas
 
 ### Frontend
-- **React 18** - Biblioteca para interface de usuário
-- **React Router DOM** - Navegação entre páginas
-- **Bootstrap 5** - Framework CSS responsivo
-- **React Bootstrap** - Componentes Bootstrap para React
-- **Bootstrap Icons** - Biblioteca de ícones
+- React 18 - Framework principal
+- Vite - Build tool e dev server
+- Bootstrap 5 - Framework CSS responsivo
+- React Bootstrap - Componentes React
+- Web3.js - Interação com blockchain
+- MetaMask - Conexão com wallet Ethereum
+
+### Backend
+- Node.js - Runtime JavaScript
+- Express.js - Framework web
+- Sequelize - ORM para PostgreSQL
 
 ### Blockchain
-- **Web3.js** - Interação com a blockchain Ethereum
-- **Ethers.js** - Biblioteca alternativa para blockchain
-- **MetaMask** - Carteira digital para autenticação
+- Solidity ^0.8.19 - Smart contracts
+- Ethereum Sepolia - Rede de teste
+- MetaMask - Wallet e provider
+- Etherscan - Explorer de blockchain
 
-### Ferramentas de Desenvolvimento
-- **Vite** - Build tool moderna e rápida
-- **ESLint** - Linting de código JavaScript
-- **Git** - Controle de versão
+### Banco de Dados
+- PostgreSQL 15 - Banco principal
+- Docker - Containerização
+- PgAdmin - Interface administrativa
 
-## 🚀 Como Executar
 
-### Pré-requisitos
-- Node.js 18+ 
-- npm ou yarn
-- MetaMask (para funcionalidades blockchain)
+## 📦 Estrutura do Projeto
 
-### Instalação
+```
+agrichain-tracker-tcc/
+├── 📁 backend/
+│   ├── 📄 server.js
+│   ├── 📁 config/
+│   │   └── database.js
+│   ├── 📁 models/
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   └── SupplyChainEvent.js
+│   ├── 📁 routes/
+│   │   ├── userRoutes.js
+│   │   ├── productRoutes.js
+│   │   └── debugRoutes.js
+│   └── 📁 middleware/
+├── 📁 src/
+│   ├── 📄 App.jsx
+│   ├── 📁 components/
+│   │   ├── 📁 Auth/
+│   │   ├── 📁 Products/
+│   │   ├── 📁 SupplyChain/
+│   │   └── 📁 Web3/
+│   ├── 📁 contracts/
+│   │   ├── AgriChainTracker.sol
+│   │   └── AgriChainABI.js
+│   ├── 📁 hooks/
+│   │   ├── useWeb3.js
+│   │   └── useSupplyChain.js
+│   ├── 📁 services/
+│   │   ├── api.js
+│   │   └── web3Service.js
+│   └── 📁 pages/
+├── 📄 docker-compose.yml
+├── 📄 BLOCKCHAIN_SETUP.md
+└── 📄 README.md
+```
+
+## 🚀 Instalação e Configuração
+
+### **1. Pré-requisitos**
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/agrichain-tracker.git
+# Node.js 18+
+node --version
 
-# Entre no diretório
-cd agrichain-tracker
+# Docker e Docker Compose
+docker --version
+docker-compose --version
 
-# Instale as dependências
+# Git
+git --version
+```
+
+### **2. Clonagem e Setup**
+```bash
+# Clonar repositório
+git clone https://github.com/HeliosBN/agrichain-tracker-tcc.git
+cd agrichain-tracker-tcc
+
+# Instalar dependências do frontend
 npm install
 
-# Execute o projeto
+# Instalar dependências do backend
+cd backend
+npm install
+cd ..
+```
+
+### **3. Configuração do Banco de Dados**
+```bash
+# Iniciar containers Docker
+docker-compose up -d
+
+# Verificar status
+docker-compose ps
+```
+
+**Acessos:**
+- **PostgreSQL**: `localhost:5432`
+- **PgAdmin**: `http://localhost:8080`
+  - Email: `admin@agrichain.com`
+  - Senha: `admin123`
+
+### **4. Configuração Blockchain**
+
+#### **MetaMask:**
+1. Instale: https://metamask.io/download/
+2. Configure rede Sepolia:
+   - Nome: `Sepolia Test Network`
+   - RPC: `https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161`
+   - Chain ID: `11155111`
+   - Símbolo: `ETH`
+   - Explorer: `https://sepolia.etherscan.io`
+
+#### **Deploy do Smart Contract:**
+1. Abra: https://remix.ethereum.org/
+2. Cole o código de `/src/contracts/AgriChainTracker.sol`
+3. Compile com Solidity 0.8.19+
+4. Deploy na rede Sepolia
+5. **COPIE O ENDEREÇO DO CONTRATO**
+6. Atualize em `/src/contracts/AgriChainABI.js`:
+   ```javascript
+   export const CONTRACT_ADDRESS = 'SEU_ENDERECO_AQUI';
+   ```
+
+#### **Obter SepoliaETH:**
+- https://sepoliafaucet.com/
+- https://faucets.chain.link/sepolia
+
+### **5. Execução**
+
+#### **Backend:**
+```bash
+cd backend
+npm start
+# Servidor: http://localhost:3001
+```
+
+#### **Frontend:**
+```bash
 npm run dev
+# Aplicação: http://localhost:5173
 ```
 
-### Variáveis de Ambiente
-```env
-REACT_APP_CONTRACT_ADDRESS=0x...
-REACT_APP_API_URL=http://localhost:3001
-REACT_APP_NETWORK_ID=1337
-```
-
-## 👨‍💻 Autor
-
-**Helio Breda Netto**
-- 🎓 Graduando em Sistemas De Informação
-- 💼 Desenvolvedor Full Stack
 
 
----
 
- 🌱+ Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
