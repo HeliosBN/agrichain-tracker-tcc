@@ -1,30 +1,24 @@
-# 🌾 AgriChain - Rastreamento Blockchain para Cadeia de Suprimentos Agrícola
+#  AgriChainTracker
 
-## 📋 Visão Geral
+O AgriChain é uma plataforma completa de rastreamento para a cadeia de suprimentos agrícola, utilizando tecnologia blockchain para garantir transparência, imutabilidade e confiabilidade dos dados. O sistema integra banco de dados PostgreSQL com blockchain Ethereum (rede Sepolia) para criar um sistema híbrido robusto.
 
-O **AgriChain** é uma plataforma completa de rastreamento para a cadeia de suprimentos agrícola, utilizando tecnologia blockchain para garantir transparência, imutabilidade e confiabilidade dos dados. O sistema integra banco de dados PostgreSQL com blockchain Ethereum (rede Sepolia) para criar um sistema híbrido robusto.
+##  Funcionalidades Principais
 
-## 🚀 Funcionalidades Principais
 
-### 🔐 **Sistema de Autenticação**
-- Registro e login de usuários (Produtores, Distribuidores, Varejistas, Consumidores)
-- Integração com banco PostgreSQL
-- Fallback para sistema mock para demonstrações
-
-### ⛓️ **Integração Blockchain**
+### ⛓️ Integração Blockchain
 - Smart contracts em Solidity na rede Sepolia
 - Conexão MetaMask para transações
 - Registro imutável de produtos na blockchain
 - Rastreamento completo da cadeia de suprimentos
 - Verificação via Etherscan
 
-### 📊 **Gestão de Produtos**
+###  Gestão de Produtos
 - Registro detalhado de produtos agrícolas
 - Categorização (vegetais, frutas, grãos, etc.)
 - Certificações (orgânico, fair-trade, etc.)
 - Dados de qualidade e rastreabilidade
 
-### 🔍 **Visualização e Monitoramento**
+###  Visualização e Monitoramento
 - Dashboard responsivo com Bootstrap 5
 - Busca de produtos na blockchain
 - Timeline de eventos da cadeia
@@ -32,37 +26,30 @@ O **AgriChain** é uma plataforma completa de rastreamento para a cadeia de supr
 
 ## 🛠️ Tecnologias Utilizadas
 
-### **Frontend**
-- **React 18** - Framework principal
-- **Vite** - Build tool e dev server
-- **Bootstrap 5** - Framework CSS responsivo
-- **React Bootstrap** - Componentes React
-- **Web3.js** - Interação com blockchain
-- **MetaMask** - Conexão com wallet Ethereum
+### Frontend
+- React 18 - Framework principal
+- Vite - Build tool e dev server
+- Bootstrap 5 - Framework CSS responsivo
+- React Bootstrap - Componentes React
+- Web3.js - Interação com blockchain
+- MetaMask - Conexão com wallet Ethereum
 
-### **Backend**
-- **Node.js** - Runtime JavaScript
-- **Express.js** - Framework web
-- **Sequelize** - ORM para PostgreSQL
-- **JWT** - Autenticação
-- **bcrypt** - Hash de senhas
-- **CORS** - Cross-origin requests
+### Backend
+- Node.js - Runtime JavaScript
+- Express.js - Framework web
+- Sequelize - ORM para PostgreSQL
 
-### **Blockchain**
-- **Solidity ^0.8.19** - Smart contracts
-- **Ethereum Sepolia** - Rede de teste
-- **MetaMask** - Wallet e provider
-- **Etherscan** - Explorer de blockchain
+### Blockchain
+- Solidity ^0.8.19 - Smart contracts
+- Ethereum Sepolia - Rede de teste
+- MetaMask - Wallet e provider
+- Etherscan - Explorer de blockchain
 
-### **Banco de Dados**
-- **PostgreSQL 15** - Banco principal
-- **Docker** - Containerização
-- **PgAdmin** - Interface administrativa
+### Banco de Dados
+- PostgreSQL 15 - Banco principal
+- Docker - Containerização
+- PgAdmin - Interface administrativa
 
-### **DevOps**
-- **Docker Compose** - Orquestração de containers
-- **Git** - Controle de versão
-- **ESLint** - Linting JavaScript
 
 ## 📦 Estrutura do Projeto
 
@@ -301,48 +288,20 @@ docker-compose restart
 docker-compose logs postgres
 ```
 
-## 🎓 Para Apresentação do TCC
-
-### **Demonstração Ao Vivo:**
-1. **Conectar MetaMask** na apresentação
-2. **Registrar produto** em tempo real
-3. **Mostrar transação** no Etherscan
-4. **Buscar produto** no BlockchainTracker
-5. **Evidenciar transparência** dos dados
-
-### **Pontos Técnicos:**
-- ✅ **Blockchain Real**: Sepolia Testnet
-- ✅ **Smart Contracts**: Solidity auditável
-- ✅ **Imutabilidade**: Dados não alteráveis
-- ✅ **Transparência**: Verificável publicamente
-- ✅ **Escalabilidade**: Arquitetura híbrida
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch: `git checkout -b feature/nome`
-3. Commit: `git commit -m 'Add feature'`
-4. Push: `git push origin feature/nome`
-5. Pull Request
-
-## 📄 Licença
-
-Este projeto está sob licença MIT. Veja `LICENSE` para detalhes.
 
 ## 👨‍💻 Autor
 
-**Helio Breda Netto** - TCC Faculdade
+Helio Breda Netto
 - GitHub: [@HeliosBN](https://github.com/HeliosBN)
-- LinkedIn: [Perfil](https://linkedin.com/in/helio-bezerra)
 
 ---
 
 ## 🚀 Status do Projeto
 
-✅ **Backend**: PostgreSQL + Express.js  
-✅ **Frontend**: React + Bootstrap  
-✅ **Blockchain**: Smart Contracts Sepolia  
-✅ **Integração**: Web3 + MetaMask  
-✅ **Documentação**: Completa  
+✅ Backend: PostgreSQL + Express.js  
+✅ Frontend: React + Bootstrap  
+✅ Blockchain: Smart Contracts Sepolia  
+✅ Integração: Web3 + MetaMask  
 
-**Pronto para apresentação do TCC!** 🎓
+
+
